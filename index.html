@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>ray marching</title>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden;">
+    <canvas id="canvas">
+        Your browser doesn't appear to support the HTML5 canvas element
+    </canvas>
+
+    <script type="shader" id="vertex-shader">
+        attribute vec2 vertexPosition;
+		
+        void main(){
+            gl_Position = vec4(vertexPosition, 0.0, 1);
+        }
+    </script>
+
+    <script type="shader" id="fragment-shader">
+        precision highp float;
+
+		uniform vec2 u_resolution;
+		uniform vec2 screenSize;
+		uniform vec3 offset, rot;
+		
+		float vmod(vec3 a) {
+			return sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+		}
+		
+		float len(vec3 a, vec3 b) {
+			a -= b;
+			return vmod(a);
+		}
+		
+		float dist_sphere(vec3 ray, vec3 sphere) {
+			return len(ray, sphere) - 3.0;
+		}
+		
+		float dist_tor(vec3 ray) {
+			float o = 1.0 + (ray.y * ray.y) / (ray.x * ray.x);
+			float ox = sign(ray.x) * 2.0 / sqrt(o);
+			float oy = (ray.y / ray.x) * ox;
+			
+			return sqrt((ray.x - ox) * (ray.x - ox) + (ray.y - oy) * (ray.y - oy) + ray.z * ray.z) - 0.5;
+		}
+		
+		float dist(vec3 ray) {
+			return max(dist_tor(ray), dist_sphere(ray, vec3(1.0, 1.0, 1.0)));
+		}
+		
+		void main(){
+			vec3 light = vec3(offset);
+			
+			vec3 dirVec = vec3((gl_FragCoord.xy - screenSize / 2.0) / screenSize.yy * 2.0, 1.0);
+ 			dirVec = dirVec / vec3(vmod(dirVec));
+			
+			dirVec.xy = vec2(
+				dirVec.x * cos(rot.z) + dirVec.y * sin(rot.z),
+				dirVec.y * cos(rot.z) - dirVec.x * sin(rot.z)
+			);
+			
+			dirVec.xz = vec2(
+				dirVec.x * cos(rot.y) - dirVec.z * sin(rot.y),
+				dirVec.z * cos(rot.y) + dirVec.x * sin(rot.y)
+			);
+			
+			dirVec.yz = vec2(
+				dirVec.y * cos(rot.x) + dirVec.z * sin(rot.x),
+				dirVec.z * cos(rot.x) - dirVec.y * sin(rot.x)
+			);
+			
+			vec3 ray = vec3(offset);
+						
+			for (int i = 0; i < 40; i++) {
+				ray += dirVec * dist(ray);
+			}
+			
+			if (dist(ray) > 0.1) {
+				gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+			} else {
+				
+				float o = 1.0 + (ray.y * ray.y) / (ray.x * ray.x);
+				float ox = sign(ray.x) * 2.0 / sqrt(o);
+				float oy = (ray.y / ray.x) * ox;
+			
+				vec3 n = vec3(ray.x - ox, ray.y - oy, ray.z);
+				
+				float cos = (n.x * light.x + n.y * light.y + n.z * light.z) / (vmod(n) * vmod(light));
+				if (cos < 0.0) cos = 0.0;
+
+				gl_FragColor = vec4(vec3(cos), 1.0);
+
+			}
+		}
+    </script>
+
+    <script>
+        function StartWebGL() {
+            var vertexShaderText = document.getElementById('vertex-shader').text,
+                fragmentShaderText = document.getElementById('fragment-shader').text,
+                canvas = document.getElementById('canvas'),
+                gl = canvas.getContext('webgl');
+                
+            if (!gl) {
+                alert('Your browser does not support WebGL');
+                return;
+            }
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            gl.viewport(0, 0, canvas.width, canvas.height);
+
+            var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+                fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+            
+            gl.shaderSource(vertexShader, vertexShaderText);
+            gl.shaderSource(fragmentShader, fragmentShaderText);
+            
+            gl.compileShader(vertexShader);
+            if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+                alert('Error compiling vertex shader!');
+		console.error(gl.getShaderInfoLog(vertexShader));
+                return;
+            }
+
+            gl.compileShader(fragmentShader);
+            if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+                alert('Error compiling fragment shader!');
+		console.error(gl.getShaderInfoLog(fragmentShader));
+                return;
+            }
+            
+            var program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+            
+            gl.validateProgram(program);
+            
+            if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
+                alert('Error validating program');
+                return;
+            }
+
+            var vertexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+            
+            var vertexArray = [
+                -1.0,  -1.0,
+                -1.0, 1.0,
+                 1.0, 1.0,
+                 1.0,  -1.0,
+            ];
+            
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexArray), gl.STATIC_DRAW);
+            var positionAttribLocation = gl.getAttribLocation(program, 'vertexPosition');
+            gl.vertexAttribPointer(
+                positionAttribLocation,
+                2,
+                gl.FLOAT,
+                gl.FALSE,
+                0,
+                0
+            );
+            gl.enableVertexAttribArray(positionAttribLocation);
+
+			var screenSize = gl.getUniformLocation(program, "screenSize"),
+				rot = gl.getUniformLocation(program, "rot"),
+				offset = gl.getUniformLocation(program, "offset");
+			
+            gl.useProgram(program);
+			
+			gl.uniform2fv(screenSize, [canvas.width, canvas.height]);
+			
+			gl.uniform3fv(offset, [-5, 0.1, 0.1]);
+			let a = -3.14;
+			setInterval(() => {
+				console.log(a);
+				gl.uniform3fv(rot, [0, a + 3.14 / 2, 0]);
+				gl.uniform3fv(offset, [Math.cos(a) * 5, 0.1, Math.sin(a) * 5]);
+				
+				gl.clearColor(1.0, 0.0, 0.0, 1.0);
+				gl.clear(gl.COLOR_BUFFER_BIT);
+
+				gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+				a += 0.01;
+				if (a > 3.14) a -= 6.28;
+			}, 20);
+		}
+		
+
+        document.addEventListener('DOMContentLoaded', function() {
+            StartWebGL();
+        });
+
+    </script>
+</body>
