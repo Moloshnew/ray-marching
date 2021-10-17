@@ -18,7 +18,7 @@
     </script>
 
     <script type="shader" id="fragment-shader">
-        precision mediump float;
+        precision lowp float;
 
 		uniform vec2 u_resolution;
 		uniform vec2 screenSize;
@@ -46,7 +46,7 @@
 		}
 		
 		float dist(vec3 ray) {
-			return dist_tor(ray);
+			return dist_sphere(ray, vec3(0.0,0.0,0.0);
 		}
 		
 		void main(){
