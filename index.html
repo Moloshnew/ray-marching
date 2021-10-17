@@ -18,7 +18,7 @@
     </script>
 
     <script type="shader" id="fragment-shader">
-        precision highp float;
+        precision lowp float;
 
 		uniform vec2 u_resolution;
 		uniform vec2 screenSize;
@@ -88,9 +88,8 @@
 				
 				float cos = (n.x * light.x + n.y * light.y + n.z * light.z) / (vmod(n) * vmod(light));
 				if (cos < 0.0) cos = 0.0;
-
+				
 				gl_FragColor = vec4(vec3(cos), 1.0);
-
 			}
 		}
     </script>
@@ -186,7 +185,7 @@
 				gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
 				a += 0.01;
 				if (a > 3.14) a -= 6.28;
-			}, 40);
+			}, 20);
 		}
 		
 
