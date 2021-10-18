@@ -38,16 +38,15 @@
 		}
 		
 		float dist_tor(vec3 ray) {
-                        float o, ox;
+                        float o, ox, oy;
                         if (ray.x * ray.x == 0.0) {
-                            ox = 0.0;
                             oy = sign(ray.y);
 			} else {
                             o = 1.0 + (ray.y * ray.y) / (ray.x * ray.x);
 			    ox = sign(ray.x) * 2.0 / sqrt(o);
+			    oy = (ray.y / ray.x) * ox;
 			}
-                        float oy = (ray.y / ray.x) * ox;
-			
+
 			return sqrt((ray.x - ox) * (ray.x - ox) + (ray.y - oy) * (ray.y - oy) + ray.z * ray.z) - 0.5;
 		}
 		
