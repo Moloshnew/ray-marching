@@ -38,9 +38,13 @@
 		}
 		
 		float dist_tor(vec3 ray) {
-			float o = 1.0 + (ray.y * ray.y) / (ray.x * ray.x);
-			float ox = sign(ray.x) * 2.0 / sqrt(o);
-			float oy = (ray.y / ray.x) * ox;
+                        float o, ox;
+                        if (ray.x * ray.x == 0.0) ox = 0.0;
+			else {
+                            o = 1.0 + (ray.y * ray.y) / (ray.x * ray.x);
+			    ox = sign(ray.x) * 2.0 / sqrt(o);
+			}
+                        float oy = (ray.y / ray.x) * ox;
 			
 			return sqrt((ray.x - ox) * (ray.x - ox) + (ray.y - oy) * (ray.y - oy) + ray.z * ray.z) - 0.5;
 		}
@@ -183,7 +187,7 @@
 				gl.clear(gl.COLOR_BUFFER_BIT);
 
 				gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
-				a += 0.01;
+				a += 0.1;
 				if (a > 3.14) a -= 6.28;
 			}, 30);
 		}
