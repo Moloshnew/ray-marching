@@ -39,8 +39,10 @@
 		
 		float dist_tor(vec3 ray) {
                         float o, ox;
-                        if (ray.x * ray.x == 0.0) ox = 0.0;
-			else {
+                        if (ray.x * ray.x == 0.0) {
+                            ox = 0.0;
+                            oy = sign(ray.y);
+			} else {
                             o = 1.0 + (ray.y * ray.y) / (ray.x * ray.x);
 			    ox = sign(ray.x) * 2.0 / sqrt(o);
 			}
@@ -187,9 +189,9 @@
 				gl.clear(gl.COLOR_BUFFER_BIT);
 
 				gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
-				a += 0.1;
+				a += 0.02;
 				if (a > 3.14) a -= 6.28;
-			}, 30);
+			}, 16);
 		}
 		
 
