@@ -39,7 +39,8 @@
 		
 		float dist_tor(vec3 ray) {
                         float o, ox, oy;
-                        if (ray.x * ray.x == 0.0) {
+                        if (ray.x > -0.0001 && ray.x < 0.0001) {
+                            ox = 0.0;
                             oy = sign(ray.y);
 			} else {
                             o = 1.0 + (ray.y * ray.y) / (ray.x * ray.x);
