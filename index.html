@@ -44,11 +44,11 @@
                             oy = sign(ray.y);
 			} else {
                             o = 1.0 + (ray.y * ray.y) / (ray.x * ray.x);
-			    ox = sign(ray.x) * 2.5 / sqrt(o);
+			    ox = sign(ray.x) * 2.3 / sqrt(o);
 			    oy = (ray.y / ray.x) * ox;
 			}
 
-			return sqrt((ray.x - ox) * (ray.x - ox) + (ray.y - oy) * (ray.y - oy) + ray.z * ray.z) - 1.0;
+			return sqrt((ray.x - ox) * (ray.x - ox) + (ray.y - oy) * (ray.y - oy) + ray.z * ray.z) - 0.7;
 		}
 		
 		float dist(vec3 ray) {
