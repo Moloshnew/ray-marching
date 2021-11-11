@@ -34,7 +34,7 @@
 		}
 		
 		float dist_sphere(vec3 ray, vec3 sphere) {
-			return len(ray, sphere) - 2.0;
+			return len(ray, sphere) - 2.;
 		}
 		
 		float dist_tor(vec3 ray) {
@@ -44,7 +44,7 @@
                             oy = sign(ray.y);
 			} else {
                             o = 1.0 + (ray.y * ray.y) / (ray.x * ray.x);
-			    ox = sign(ray.x) * 2.3 / sqrt(o);
+			    ox = sign(ray.x) * 2 / sqrt(o);
 			    oy = (ray.y / ray.x) * ox;
 			}
 
@@ -52,7 +52,7 @@
 		}
 		
 		float dist(vec3 ray) {
-			return dist_tor(ray);
+			return min(dist_tor(ray), dist_ray);
 		}
 		
 		void main(){
