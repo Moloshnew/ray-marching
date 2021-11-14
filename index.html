@@ -44,7 +44,7 @@
                             oy = sign(ray.y);
 			} else {
                             o = 1.0 + (ray.y * ray.y) / (ray.x * ray.x);
-			    ox = sign(ray.x) * 2 / sqrt(o);
+			    ox = sign(ray.x) * 2. / sqrt(o);
 			    oy = (ray.y / ray.x) * ox;
 			}
 
